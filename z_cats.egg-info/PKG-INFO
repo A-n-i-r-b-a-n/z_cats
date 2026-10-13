@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: z_cats
+Version: 0.0.0
+Author: Anirban Naskar
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+Requires-Dist: pillow
+Requires-Dist: h5py
+Requires-Dist: pyvista

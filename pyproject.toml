@@ -1,0 +1,23 @@
+[build-system]
+requires = ['setuptools>=61']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'z_cats'
+version = '0.0.0'
+authors = [
+         { name = 'Anirban Naskar'}
+]
+dependencies = [
+        "numpy",
+        "matplotlib", 
+        "pillow", 
+        "h5py",
+        "pyvista"
+]
+
+readme = 'README.md'
+requires-python = '>=3.10'
+
+[tool.setuptools]
+packages = ["z_cats"]
