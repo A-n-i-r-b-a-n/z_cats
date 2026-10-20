@@ -156,6 +156,45 @@ def box(label, *data, **kwargs):
     return None
 #-------------------------------------------------------------------------------#
 
+def box_dm_and_gas(dm_data, gas_data):
+    plotter = pv.Plotter()
+
+    plotter.add_points(
+    dm_data/1e3, #dm
+    color="red",
+    point_size=1,
+    render_points_as_spheres=False,
+    opacity=0.35,
+    label="High-resolution DM"
+)
+
+    plotter.add_points(
+    gas_data/1e3, #dm
+    color="white",
+    point_size=1,
+    render_points_as_spheres=False,
+    opacity=0.35,
+    label="High-resolution gas"
+)
+    
+    plotter.set_background('black')
+    plotter.show()
+
+    plotter.show_bounds(
+    location='outer',
+    xtitle= "x (Mpc)",
+    ytitle= "y (Mpc)",
+    ztitle= "y (Mpc)",
+
+    color = 'white',
+    font_size = 10,
+    n_xlabels = 5,
+    n_ylabels = 5,
+    n_zlabels = 5 )
+    plotter.add_axes()
+    
+    return None
+
 ################################################################################
 # generating png files from a snap
 ################################################################################
@@ -223,6 +262,71 @@ def create_image(snap, **kwargs):
 
     return None
 
+################################################################################
+# Displaying snapshots pointcloud
+################################################################################
+def display_image(snap, **kwargs):
+
+    if "PartType" in kwargs.keys():
+        pt = kwargs['PartType']
+    else:
+        pt = 1
+
+    if 'name' in kwargs.keys():
+        nm = kwargs['name']
+    else:
+        nm = 'box.png'
+
+    if 'scale' in kwargs.keys():
+        scl = kwargs['scale']
+    else:
+        scl = 1e3
+
+    if 'point_size' in kwargs.keys():
+        ps = kwargs['point_size']
+    else:
+        ps = 0.1
+
+    if 'path' in kwargs.keys():
+        pth = kwargs['path']
+    else:
+        pth = '.'
+
+    if 'out_path' in kwargs.keys():
+        o_path = kwargs['out_path']
+    else:
+        o_path = '.'
+
+    fig, ax = plt.subplots(figsize = (20, 20), subplot_kw = {'projection': '3d'}, facecolor = 'black')
+    coord = np.array(load_data.load_snap(snap, path = pth, PartType = pt,  param = 'Coordinates')[:])
+
+    ax.scatter(coord[: , 0]/scl, coord[: , 1]/scl, coord[: , 2]/scl, s = ps, alpha = 1,  color = 'white')
+
+    ax.set_facecolor('black')
+    ax.set_aspect('equal')
+    ax.xaxis.pane.fill = False
+    ax.yaxis.pane.fill = False
+    ax.zaxis.pane.fill = False
+
+    ax.set_xlabel('x(Mpc)', fontsize = 12)
+    ax.set_ylabel('y(Mpc)', fontsize = 12)
+    ax.set_zlabel('z(Mpc)', fontsize = 12)
+
+    ax.set_xlim(0, 50)
+    ax.set_ylim(0, 50)
+    ax.set_zlim(0, 50)
+
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.zaxis.label.set_color('white')
+
+    ax.tick_params(colors = 'white')
+
+    ax.grid(False)
+    #plt.savefig(f'{o_path}/{nm}')
+    #plt.close(fig)
+
+    return None
 
 def __test():
     return None

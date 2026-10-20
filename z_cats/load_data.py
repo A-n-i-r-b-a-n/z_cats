@@ -54,12 +54,15 @@ def load_snap(snap, **kwargs):
 ##############################################################################################
 # Loading FoF files
 ##############################################################################################
-def load_fof(fof_num ):
-    fname = f'fof_'
-    return None
 
 def ext_partID_from_group(snap, group_id, **kwargs):
+    """
+    snap: int type, refers to the snap number
 
+    group_id: int type, refers to the group ID
+    
+    path: str type, takes the path where the snaps exist
+    """
     if 'path' in kwargs.keys():
         pth = kwargs['path']
     else:

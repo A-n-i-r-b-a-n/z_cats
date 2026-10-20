@@ -7,6 +7,13 @@ import h5py as h
 ####################################################
 
 def ext_partID_from_group(snap, group_id, **kwargs):
+    """
+    snap: int type, refers to the snap number
+
+    group_id: int type, refers to the group ID
+    
+    path: str type, takes the path where the snaps exist
+    """ 
 
     if 'path' in kwargs.keys():
         pth = kwargs['path']
@@ -36,6 +43,13 @@ def ext_partID_from_group(snap, group_id, **kwargs):
 #########################################################
 
 def unwarp(axis, l_box):
+    """
+
+    Unwraps lagrangian region if it crosses the periodic boundaries
+    axis = numpy ndarrat type, refers to the axis to unwrap
+
+    l_box: int type, refers to the size of the simulation volume in kpc
+    """
     a = axis
 
     #finding the largest gap
@@ -59,6 +73,20 @@ def unwarp(axis, l_box):
 ############################################################
 
 def ref_params(x, y, z, l_box):
+    """
+    Takes x, y and z axis, and box length as input to com-
+    pute the ref parameters to be given in the MUSIC param 
+    file
+
+    x: numpy ndarray type, refers to the unwrapped x axis
+
+    y: numpy ndarray type, refers to the unwrapped y axis
+
+    z: numpy ndarray type, refers to the unwrapped z axis
+
+    l_box: int type, refers to the size of the simulation 
+    box in kpc
+    """
 
     ref_min = np.array([
         x.min(),
