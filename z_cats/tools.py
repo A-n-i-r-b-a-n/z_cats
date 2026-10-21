@@ -3,7 +3,7 @@ import h5py as h
 
 
 ####################################################
-# Extracyion of particle Ids from a giben group ID #
+# Extracyion of particle Ids from a given group ID #
 ####################################################
 
 def ext_partID_from_group(snap, group_id, **kwargs):

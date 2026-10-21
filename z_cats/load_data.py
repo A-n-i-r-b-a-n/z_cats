@@ -1,7 +1,7 @@
 #importing important libraries
 import numpy as np
 import h5py as h
-
+import tools
 
 ##########################################################################################
 # Loading Snap Files
@@ -84,10 +84,33 @@ def ext_partID_from_group(snap, group_id, **kwargs):
     
     return ids
 
+##############################################################################################
+# Extract particle coordinates from a group
+##############################################################################################
+def ext_group_coord(gID, snap):
+    """
+    The function takes group ID and snapshot number to extract 
+    the coordinates of the particles in a particle snapshot
 
+    gID: int type; refers to the group ID of interest
+    snap: int type; refers to the snapshot number 
+    """
 
+    #extract the the coordinates of all particles in the snapshot
+    snap_coord  = load_snap(snap, param = 'Coordinates')
+    #extract the snap particle ID data
+    snap_part_IDs = load_snap(snap, param = 'ParticleIDs')
+    #extracting the particle IDs of a given group
+    g_part_IDs = ext_partID_from_group(snap, gID)
+    #creating a particle mask to filter out the coordinates 
+    #associated with particle IDs of a given group
+    part_mask = np.isin(snap_part_IDs, g_part_IDs)
 
-
+    #filtering out the coordinates of the particles associated
+    #with a given group
+    g_coords = snap_coord[part_mask]
+    return g_coords
+#-------------------------------------------------------------------------------------------------#
 #exectution 
 
 if __name__ == "__main__" :

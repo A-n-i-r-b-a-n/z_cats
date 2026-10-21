@@ -4,7 +4,7 @@ import h5py as h
 from PIL import Image
 from pathlib import Path
 import pyvista as pv
-from . import load_data
+from z_cats import load_data
 
 
 ##############################################################################
@@ -75,7 +75,7 @@ def movie(path, **kwargs):
 #------------------------------------------------------------------------------#
 
 ################################################################################
-# Plotting 3D box
+# Plotting 3D interactive box
 ################################################################################
 
 def box(label, *data, **kwargs):
@@ -156,7 +156,21 @@ def box(label, *data, **kwargs):
     return None
 #-------------------------------------------------------------------------------#
 
+#################################################################################
+# Plotting 3D non-interactive box
+#################################################################################
+
 def box_dm_and_gas(dm_data, gas_data):
+    """
+    The function takes the dark matter coordinates and gas/baryonic matter coordi-
+    nates and plots the 3D box with appropriate color code
+
+    dm_data: numpy ndarray type, refers to the coordinates of the dark matter part-
+    icles
+
+    gas_data: numpy ndarray type, refers to the coordinates of the gas/baryonic par-
+    ticles 
+    """
     plotter = pv.Plotter()
 
     plotter.add_points(
@@ -194,12 +208,35 @@ def box_dm_and_gas(dm_data, gas_data):
     plotter.add_axes()
     
     return None
+#-------------------------------------------------------------------------------#
 
-################################################################################
+#################################################################################
 # generating png files from a snap
-################################################################################
+#################################################################################
 
 def create_image(snap, **kwargs):
+    """
+    Function takes the snapshot number and other parameters and saves the image of
+    the point cloud.
+
+    snap: int type; refers to the snapshot number
+
+    PartType: int type; refers to the particle type
+
+    name: string type; refers to the name of the png file saved, default is box.png
+
+    scl: int type; refers to the normalization scales of the displayed axes, defau-
+    lt is 1e3
+
+    point_size: float type; refers to the point size to be used in the point cloud d-
+    efault is 0.1
+
+    path: string type; refers to the path of the snapshot folder, default is current d-
+    irectory
+
+    out_path: string type; refers to the output path of the png file; default is current 
+    direcory
+    """
 
     if "PartType" in kwargs.keys():
         pt = kwargs['PartType']
@@ -261,11 +298,32 @@ def create_image(snap, **kwargs):
     plt.close(fig)
 
     return None
+#------------------------------------------------------------------------------#
 
 ################################################################################
 # Displaying snapshots pointcloud
 ################################################################################
 def display_image(snap, **kwargs):
+    """
+    Function takes the snapshot number and other parameters and saves the image of
+    the point cloud.
+
+    snap: int type; refers to the snapshot number
+
+    PartType: int type; refers to the particle type
+
+    name: string type; refers to the name of the png file saved, default is box.png
+
+    scl: int type; refers to the normalization scales of the displayed axes, defau-
+    lt is 1e3
+
+    point_size: float type; refers to the point size to be used in the point cloud d-
+    efault is 0.1
+
+    path: string type; refers to the path of the snapshot folder, default is current d-
+    irectory
+
+    """
 
     if "PartType" in kwargs.keys():
         pt = kwargs['PartType']
@@ -292,14 +350,8 @@ def display_image(snap, **kwargs):
     else:
         pth = '.'
 
-    if 'out_path' in kwargs.keys():
-        o_path = kwargs['out_path']
-    else:
-        o_path = '.'
-
     fig, ax = plt.subplots(figsize = (20, 20), subplot_kw = {'projection': '3d'}, facecolor = 'black')
     coord = np.array(load_data.load_snap(snap, path = pth, PartType = pt,  param = 'Coordinates')[:])
-
     ax.scatter(coord[: , 0]/scl, coord[: , 1]/scl, coord[: , 2]/scl, s = ps, alpha = 1,  color = 'white')
 
     ax.set_facecolor('black')
@@ -323,10 +375,93 @@ def display_image(snap, **kwargs):
     ax.tick_params(colors = 'white')
 
     ax.grid(False)
-    #plt.savefig(f'{o_path}/{nm}')
-    #plt.close(fig)
-
     return None
+#-------------------------------------------------------------------------------#
+
+################################################################################
+# Group visualisation in a snapshot
+################################################################################
+def group_vis_marked(gID, snap, **kwargs):
+    """
+    Function takes group ID and snap number and other parameters to plot a point
+    cloud with selected group color coded as red
+
+    gID: int type; refers to the group ID of interest
+
+    snap: int type; refers to the snap number of interest
+
+    path: string type; refers to the path of the snapshot and fof files, default is
+    current directory
+
+    scale: float type; refers to the normalization scale of the plot axes
+
+    point_size: float type: refers to the point size of the point cloud
+
+    color: touple/string/hexcode type; refers to the color code of the selected group
+    """
+    if 'path' in kwargs.keys():
+        pth = kwargs['path']
+    else:
+        pth = '.'
+
+    if 'scale' in kwargs.keys():
+        scl = kwargs['scale']
+    else:
+        scl = 1e3
+
+    if 'point_size' in kwargs.keys():
+        ps = kwargs['point_size']
+    else:
+        ps = 0.1
+
+    if 'color' in kwargs.keys:
+        col = kwargs['color']
+    else:
+        col = 'red'
+    
+    snap_coords = load_data.load_snap(snap, path = pth)
+    group_coords = load_data.ext_group_coord(gID, snap)
+
+    all_partIDs = load_data.load_snap(snap, param = 'ParticleIDs')
+    group_partIDs = load_data.ext_partID_from_group(snap, gID)
+
+    mask = np.isin(all_partIDs, group_partIDs)
+    g_idx = np.where(mask)[0]
+    mask2 = ~np.isin(np.arange(len(snap_coords)), g_idx)
+
+    not_group_coords = snap_coords[mask2]
+
+    fig, ax = plt.subplots(figsize = (20, 20), subplot_kw = {'projection': '3d'}, facecolor = 'black')
+    
+    ax.scatter(not_group_coords[: , 0]/scl, not_group_coords[: , 1]/scl, not_group_coords[: , 2]/scl, 
+               s = ps, alpha = 1,  color = 'white')
+
+    ax.scatter(group_coords[: , 0]/scl, group_coords[: , 1]/scl, group_coords[: , 2]/scl, 
+               s = ps, alpha = 1,  color = col)
+
+    ax.set_facecolor('black')
+    ax.set_aspect('equal')
+    ax.xaxis.pane.fill = False
+    ax.yaxis.pane.fill = False
+    ax.zaxis.pane.fill = False
+
+    ax.set_xlabel('x(Mpc)', fontsize = 12)
+    ax.set_ylabel('y(Mpc)', fontsize = 12)
+    ax.set_zlabel('z(Mpc)', fontsize = 12)
+
+    ax.set_xlim(0, 50)
+    ax.set_ylim(0, 50)
+    ax.set_zlim(0, 50)
+
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.zaxis.label.set_color('white')
+
+    ax.tick_params(colors = 'white')
+
+    ax.grid(False)
+    return None
+#-------------------------------------------------------------------------------#
 
 def __test():
     return None
