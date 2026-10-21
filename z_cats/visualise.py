@@ -4,7 +4,6 @@ import h5py as h
 from PIL import Image
 from pathlib import Path
 import pyvista as pv
-import load_data
 
 
 ##############################################################################
