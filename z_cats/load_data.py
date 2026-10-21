@@ -1,7 +1,6 @@
 #importing important libraries
 import numpy as np
 import h5py as h
-import tools
 
 ##########################################################################################
 # Loading Snap Files

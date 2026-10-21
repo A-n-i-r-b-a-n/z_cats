@@ -4,7 +4,7 @@ import h5py as h
 from PIL import Image
 from pathlib import Path
 import pyvista as pv
-from z_cats import load_data
+import load_data
 
 
 ##############################################################################
@@ -464,6 +464,7 @@ def group_vis_marked(gID, snap, **kwargs):
 #-------------------------------------------------------------------------------#
 
 def __test():
+    print('code ran successfully...')
     return None
 
 if __name__ == '__main__':

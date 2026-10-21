@@ -115,3 +115,9 @@ def ref_params(x, y, z, l_box):
     return ref_center_norm, ref_extent_norm, ref_offset_norm
 
 
+def __test():
+    print('code ran successfully...')
+    return None
+
+if __name__ == '__main__':
+    __test()
