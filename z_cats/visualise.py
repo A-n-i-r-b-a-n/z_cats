@@ -4,7 +4,7 @@ import h5py as h
 from PIL import Image
 from pathlib import Path
 import pyvista as pv
-
+from . import load_data, tools
 
 ##############################################################################
 # Making a movie (.gif files from snaps)
@@ -97,8 +97,8 @@ def box(label, *data, **kwargs):
     displaying
 
     """
-    plotter = pv.Plotter()
     window_size = (1920, 1080)
+    plotter = pv.Plotter(window_size=window_size)
     #set point size
     if 'point_size' in kwargs.keys():
         p = kwargs['point_size']
@@ -119,7 +119,7 @@ def box(label, *data, **kwargs):
     #datasets
     for i in data:
         cloud = pv.PolyData(i)
-        plotter.add_points(cloud, point_size = p)
+        plotter.add_points(cloud, point_size = p, read_points_as_spheres = True)
 
     #final plot operation
     
@@ -137,6 +137,15 @@ def box(label, *data, **kwargs):
 
     plotter.add_axes()
     plotter.set_background('black')
+    plotter.add_axes()
+    plotter.set_background('black')
+
+    # Keep the physical proportions of the coordinates
+    plotter.set_scale(1, 1, 1)
+
+    # Center the camera on the data and fit the entire cloud
+    plotter.view_isometric()
+    plotter.reset_camera()
 
     if r:
         plotter.view_xz()
@@ -156,25 +165,54 @@ def box(label, *data, **kwargs):
 #-------------------------------------------------------------------------------#
 
 #################################################################################
-# Plotting 3D non-interactive box
+# Plotting interactive dm and gas box
 #################################################################################
-
-def box_dm_and_gas(dm_data, gas_data):
+def box_multiparticle(label, dm_data, gas_data, **kwargs):
     """
     The function takes the dark matter coordinates and gas/baryonic matter coordi-
     nates and plots the 3D box with appropriate color code
+
+    label: lsit type, contains the list of labels for x, y and z axes.
 
     dm_data: numpy ndarray type, refers to the coordinates of the dark matter part-
     icles
 
     gas_data: numpy ndarray type, refers to the coordinates of the gas/baryonic par-
     ticles 
+
+    sf_data: numpy ndarray type, refers to the coordinates of the star particles.
+
+    dm_color: string/touple/vector type, refers to the color of dm particles.
+
+    gas_color: string/touple/vector type, refers to the color of gas particles.
+
+    sf_color: string/touple/vector type, refers to the color of star particles
+
+    scale: int type, refers to the scale of the box, eg. 1e3 
+
+
     """
+
+    if 'dm_color' in kwargs.keys():
+        dmc = kwargs['dm_color']
+    else:
+        dmc = 'red'
+
+    if 'gas_color' in kwargs.keys():
+        gc = kwargs['gas_color']
+    else:
+        gc = 'white'
+
+    if 'scale' in kwargs.keys():
+        scl = kwargs['scale']
+    else:
+        scl = 1
+    
     plotter = pv.Plotter()
 
     plotter.add_points(
-    dm_data/1e3, #dm
-    color="red",
+    dm_data/1, #dm
+    color= dmc,
     point_size=1,
     render_points_as_spheres=False,
     opacity=0.35,
@@ -182,22 +220,38 @@ def box_dm_and_gas(dm_data, gas_data):
 )
 
     plotter.add_points(
-    gas_data/1e3, #dm
-    color="white",
+    gas_data/1, #dm
+    color= gc,
     point_size=1,
     render_points_as_spheres=False,
     opacity=0.35,
     label="High-resolution gas"
 )
-    
+    if 'sf_data' in kwargs.keys():
+
+        if 'sf_color' in kwargs.keys():
+            sfc = kwargs['sf_color']
+        else:
+            sfc = 'yellow'
+        
+        sf_data = kwargs['sf_data']
+        plotter.add_points(
+        sf_data/1, #sf
+        color= sfc,
+        point_size=1,
+        render_points_as_spheres=False,
+        opacity=0.35,
+        label="High-resolution star particles"
+        )
+
     plotter.set_background('black')
     plotter.show()
 
     plotter.show_bounds(
     location='outer',
-    xtitle= "x (Mpc)",
-    ytitle= "y (Mpc)",
-    ztitle= "y (Mpc)",
+    xtitle= label[0],
+    ytitle= label[1],
+    ztitle= label[2],
 
     color = 'white',
     font_size = 10,
@@ -413,16 +467,16 @@ def group_vis_marked(gID, snap, **kwargs):
     else:
         ps = 0.1
 
-    if 'color' in kwargs.keys:
+    if 'color' in kwargs.keys():
         col = kwargs['color']
     else:
         col = 'red'
     
-    snap_coords = load_data.load_snap(snap, path = pth)
-    group_coords = load_data.ext_group_coord(gID, snap)
+    snap_coords = load_data.load_snap(snap, path = pth, param = 'Coordinates')
+    group_coords = tools.ext_group_coord(gID, snap)
 
     all_partIDs = load_data.load_snap(snap, param = 'ParticleIDs')
-    group_partIDs = load_data.ext_partID_from_group(snap, gID)
+    group_partIDs = tools.ext_partID_from_group(snap, gID)
 
     mask = np.isin(all_partIDs, group_partIDs)
     g_idx = np.where(mask)[0]

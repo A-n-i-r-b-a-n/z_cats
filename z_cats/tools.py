@@ -1,6 +1,6 @@
 import numpy as np
 import h5py as h
-
+from . import load_data
 
 ####################################################
 # Extracyion of particle Ids from a given group ID #
@@ -35,8 +35,7 @@ def ext_partID_from_group(snap, group_id, **kwargs):
     fof_dat.close()
     
     return ids
-
-
+#-------------------------------------------------------#
 
 #########################################################
 # Performing Unwrapping Operation                       #
@@ -66,13 +65,13 @@ def unwarp(axis, l_box):
     # Shift the low-a part across the periodic boundary
     a_new[mask_a_lg] += l_box
     return a_new 
-
+#----------------------------------------------------------#
 
 ############################################################
 #  Computing r_offset r_extent and r_center                #
 ############################################################
 
-def ref_params(x, y, z, l_box):
+def ref_params(x, y, z, l_box, **kwargs):
     """
     Takes x, y and z axis, and box length as input to com-
     pute the ref parameters to be given in the MUSIC param 
@@ -86,7 +85,15 @@ def ref_params(x, y, z, l_box):
 
     l_box: int type, refers to the size of the simulation 
     box in kpc
+
+    buffer: float type, range (0 - 1), adds a buffer aro- 
+    und the extent ofthe lagrangian region
     """
+
+    if 'buffer' in kwargs.keys():
+        buff = kwargs['buffer']
+    else:
+        buff = 1
 
     ref_min = np.array([
         x.min(),
@@ -100,20 +107,55 @@ def ref_params(x, y, z, l_box):
         z.max()
     ])
 
-    ref_extent = ref_max - ref_min
-    ref_center = (ref_min + ref_max) / 2
+    extent = ref_max - ref_min
+    buffer = buff*extent
+
+    l_min = ref_min - buffer
+    l_max = ref_max + buffer
+
+    ref_center = (l_min + l_max) / 2
+    ref_extent = l_max - l_min
 
     # Normalize for MUSIC
-    ref_offset_norm = ref_min / l_box
-    ref_extent_norm = ref_extent / l_box
     ref_center_norm = ref_center/l_box
+    ref_extent_norm = ref_extent / l_box
+    ref_offset_norm = l_min / l_box
+    
     
     print("ref_center =", ref_center_norm)
-    print("ref_offset =", ref_offset_norm)
     print("ref_extent =", ref_extent_norm)
+    print("ref_offset =", ref_offset_norm)
 
     return ref_center_norm, ref_extent_norm, ref_offset_norm
+#---------------------------------------------------------------#
 
+#################################################################
+# Extract particle coordinates from a group
+#################################################################
+def ext_group_coord(gID, snap):
+    """
+    The function takes group ID and snapshot number to extract 
+    the coordinates of the particles in a particle snapshot
+
+    gID: int type; refers to the group ID of interest
+    snap: int type; refers to the snapshot number 
+    """
+
+    #extract the the coordinates of all particles in the snapshot
+    snap_coord  = load_data.load_snap(snap, param = 'Coordinates')
+    #extract the snap particle ID data
+    snap_part_IDs = load_data.load_snap(snap, param = 'ParticleIDs')
+    #extracting the particle IDs of a given group
+    g_part_IDs = ext_partID_from_group(snap, gID)
+    #creating a particle mask to filter out the coordinates 
+    #associated with particle IDs of a given group
+    part_mask = np.isin(snap_part_IDs, g_part_IDs)
+
+    #filtering out the coordinates of the particles associated
+    #with a given group
+    g_coords = snap_coord[part_mask]
+    return g_coords
+#-------------------------------------------------------------------#
 
 def __test():
     print('code ran successfully...')
