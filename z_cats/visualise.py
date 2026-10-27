@@ -167,7 +167,7 @@ def box(label, *data, **kwargs):
 #################################################################################
 # Plotting interactive dm and gas box
 #################################################################################
-def box_multiparticle(label, dm_data, gas_data, **kwargs):
+def box_multiparticle(label, dm_data, **kwargs):
     """
     The function takes the dark matter coordinates and gas/baryonic matter coordi-
     nates and plots the 3D box with appropriate color code
