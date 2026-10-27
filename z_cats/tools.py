@@ -90,11 +90,6 @@ def ref_params(x, y, z, l_box, **kwargs):
     und the extent ofthe lagrangian region
     """
 
-    if 'buffer' in kwargs.keys():
-        buff = kwargs['buffer']
-    else:
-        buff = 1
-
     ref_min = np.array([
         x.min(),
         y.min(),
@@ -108,20 +103,28 @@ def ref_params(x, y, z, l_box, **kwargs):
     ])
 
     extent = ref_max - ref_min
-    buffer = buff*extent
 
-    l_min = ref_min - buffer
-    l_max = ref_max + buffer
+    if 'buffer' in kwargs.keys():
+        buff = kwargs['buffer']
+        buffer = buff*extent
 
-    ref_center = (l_min + l_max) / 2
-    ref_extent = l_max - l_min
+        l_min = ref_min - buffer
+        l_max = ref_max + buffer
+
+        ref_center = (l_min + l_max) / 2
+        ref_extent = l_max - l_min
+        ref_offset = l_min
+
+    else:
+        ref_extent = extent
+        ref_center = (ref_min + ref_max)/2
+        ref_offset = ref_min
 
     # Normalize for MUSIC
     ref_center_norm = ref_center/l_box
     ref_extent_norm = ref_extent / l_box
-    ref_offset_norm = l_min / l_box
-    
-    
+    ref_offset_norm = ref_offset / l_box
+
     print("ref_center =", ref_center_norm)
     print("ref_extent =", ref_extent_norm)
     print("ref_offset =", ref_offset_norm)
