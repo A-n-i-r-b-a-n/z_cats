@@ -203,6 +203,11 @@ def box_multiparticle(label, dm_data, gas_data, **kwargs):
     else:
         gc = 'white'
 
+    if 'bh_color' in kwargs.keys():
+        bhc = kwargs['bh_color']
+    else:
+        bhc = 'blue'
+    
     if 'scale' in kwargs.keys():
         scl = kwargs['scale']
     else:
@@ -211,7 +216,7 @@ def box_multiparticle(label, dm_data, gas_data, **kwargs):
     plotter = pv.Plotter()
 
     plotter.add_points(
-    dm_data/1, #dm
+    dm_data/scl, #dm
     color= dmc,
     point_size=1,
     render_points_as_spheres=False,
@@ -220,7 +225,7 @@ def box_multiparticle(label, dm_data, gas_data, **kwargs):
 )
 
     plotter.add_points(
-    gas_data/1, #dm
+    gas_data/scl, #dm
     color= gc,
     point_size=1,
     render_points_as_spheres=False,
@@ -236,7 +241,7 @@ def box_multiparticle(label, dm_data, gas_data, **kwargs):
         
         sf_data = kwargs['sf_data']
         plotter.add_points(
-        sf_data/1, #sf
+        sf_data/scl, #sf
         color= sfc,
         point_size=1,
         render_points_as_spheres=False,
@@ -244,8 +249,39 @@ def box_multiparticle(label, dm_data, gas_data, **kwargs):
         label="High-resolution star particles"
         )
 
+    if 'lrdm_data' in kwargs.keys():
+        if 'lrdm_color' in kwargs.keys():
+            lrdmc = kwargs['lrdm_color']
+        else:
+            lrdmc = 'gray'
+   
+        lrdm_data = kwargs['lrdm_data']
+        plotter.add_points(
+        lrdm_data/scl, #lrdm
+        color= lrdmc,
+        point_size=1,
+        render_points_as_spheres=False,
+        opacity=0.35,
+        label="Low-resolution dark matter particles"
+        )
+
+    if 'bh_data' in kwargs.keys():
+            if 'bh_color' in kwargs.keys():
+                bhc = kwargs['bh_color']
+            else:
+                bhc = 'blue'
+       
+            bh_data = kwargs['lrdm_data']
+            plotter.add_points(
+            bh_data/scl, #bh
+            color= bhc,
+            point_size=1,
+            render_points_as_spheres=False,
+            opacity=0.35,
+            label="Black hole particles"
+            )
+
     plotter.set_background('black')
-    plotter.show()
 
     plotter.show_bounds(
     location='outer',
@@ -259,6 +295,7 @@ def box_multiparticle(label, dm_data, gas_data, **kwargs):
     n_ylabels = 5,
     n_zlabels = 5 )
     plotter.add_axes()
+    plotter.show()
     
     return None
 #-------------------------------------------------------------------------------#
