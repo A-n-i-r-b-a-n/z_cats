@@ -198,16 +198,6 @@ def box_multiparticle(label, dm_data, gas_data, **kwargs):
     else:
         dmc = 'red'
 
-    if 'gas_color' in kwargs.keys():
-        gc = kwargs['gas_color']
-    else:
-        gc = 'white'
-
-    if 'bh_color' in kwargs.keys():
-        bhc = kwargs['bh_color']
-    else:
-        bhc = 'blue'
-    
     if 'scale' in kwargs.keys():
         scl = kwargs['scale']
     else:
@@ -224,14 +214,23 @@ def box_multiparticle(label, dm_data, gas_data, **kwargs):
     label="High-resolution DM"
 )
 
-    plotter.add_points(
-    gas_data/scl, #dm
-    color= gc,
-    point_size=1,
-    render_points_as_spheres=False,
-    opacity=0.35,
-    label="High-resolution gas"
-)
+    if 'gas_data' in kwargs.keys():
+
+        if 'gas_color' in kwargs.keys():
+            gc = kwargs['gas_color']
+        else:
+            gc = 'white'
+        
+        gas_data = kwargs['gas_data']
+        plotter.add_points(
+        gas_data/scl, #gas
+        color= gc,
+        point_size=1,
+        render_points_as_spheres=False,
+        opacity=0.35,
+        label="High-resolution gas particles"
+        )
+
     if 'sf_data' in kwargs.keys():
 
         if 'sf_color' in kwargs.keys():
